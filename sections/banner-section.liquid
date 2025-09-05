@@ -1,0 +1,127 @@
+{% comment %}
+  Banner section converted from your provided HTML.
+  - CSS is in assets/banner.css (separate file).
+  - Editable via theme customizer: top_left_text, essence_text, desktop_cta_label,
+    hero_title, hero_desc_full, hero_desc_mobile, shop_now_label, footer_text_desktop, footer_text_mobile.
+  - Images are loaded from assets/.
+{% endcomment %}
+
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Load CSS from assets (separate file) -->
+<link href="{{ 'banner.css' | asset_url }}" rel="stylesheet">
+
+<section id="banner-section-{{ section.id }}" class="banner-section">
+  <div class="canvas">
+
+    <!-- Top Banner -->
+    <header class="eg-banner-top" id="topBanner">
+      <div class="mobile-menu-icon" id="hamburger">
+        <img src="{{ 'hamburger.png' | asset_url }}" alt="menu" />
+      </div>
+
+      <!-- Editable top-left text -->
+      <div class="top-left-text">{{ section.settings.top_left_text }}</div>
+
+      <!-- Editable middle / essence text -->
+      <div class="eg-banner-essence">{{ section.settings.essence_text }}</div>
+
+      <!-- Desktop CTA (text editable) -->
+      <button class="desktop-cta">
+        {{ section.settings.desktop_cta_label }}
+        <img src="{{ 'Line 15.png' | asset_url }}" alt="arrow" width="24" height="24" />
+      </button>
+
+      <!-- Extended Banner Content (Mobile Only) -->
+      <div class="banner-extended">
+        <div class="eg-banner-essence">{{ section.settings.essence_text }}</div>
+        <button class="desktop-cta">
+          {{ section.settings.desktop_cta_label }}
+          <img src="{{ 'Line 15.png' | asset_url }}" alt="arrow" width="24" height="24" />
+        </button>
+      </div>
+    </header>
+
+    <div class="eg-banner-inner">
+      <!-- Editable hero title -->
+      <h1 class="gift-guide">{{ section.settings.hero_title }}</h1>
+
+      <!-- Editable desktop description (long) -->
+      <p class="gift-sub">
+        {{ section.settings.hero_desc_full }}
+      </p>
+
+      <!-- Mobile version (hidden on desktop) -->
+      <p class="gift-sub mobile-text">
+        {{ section.settings.hero_desc_mobile }}
+      </p>
+
+      <!-- Shop now button (text editable) -->
+      <button class="shop-now" type="button">
+        {{ section.settings.shop_now_label }}
+        <img src="{{ 'line 15 white.png' | asset_url }}" alt="arrow" width="16" height="16" />
+      </button>
+
+      <!-- Hero Section Frames (images from assets) -->
+      <div class="frame1">
+        <div class="image-wrapper1">
+          <img src="{{ 'Frame.svg' | asset_url }}" alt="Frame Image 1" />
+        </div>
+      </div>
+      <div class="frame2">
+        <div class="image-wrapper2">
+          <img src="{{ 'Frame.svg' | asset_url }}" alt="Frame Image 2" />
+        </div>
+      </div>
+      <div class="mobile-frame1">
+        <div class="image-mobile-frame1">
+          <div class="image-mobile-wrapper1">
+            <img src="{{ 'Framemobile.svg' | asset_url }}" alt="Mobile Frame" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer (editable texts) -->
+    <footer>
+      <p class="footer-text">
+        {{ section.settings.footer_text_desktop }}
+      </p>
+      <p class="footer-text mobile-footer-text">
+        {{ section.settings.footer_text_mobile }}
+      </p>
+    </footer>
+
+  </div>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const topBanner = document.getElementById('topBanner');
+
+    if (hamburger) {
+      hamburger.addEventListener('click', () => {
+        topBanner.classList.toggle('expanded');
+      });
+    }
+  </script>
+</section>
+
+{% schema %}
+{
+  "name": "banner-section",
+  "settings": [
+    { "type": "text", "id": "top_left_text", "label": "Top Left Text", "default": "TISSO VISON" },
+    { "type": "text", "id": "essence_text", "label": "Middle / Essence Text", "default": "Find the ideal gift for your loved ones." },
+    { "type": "text", "id": "desktop_cta_label", "label": "Desktop CTA Label", "default": "CHOOSE GIFT" },
+    { "type": "text", "id": "hero_title", "label": "Hero Title", "default": "The Gift Guide" },
+    { "type": "textarea", "id": "hero_desc_full", "label": "Hero Description (Desktop)", "default": "Discover Joy: Your Ultimate Holiday Gift Destination. Explore our curated selection and find the perfect gifts to delight your loved ones this holiday season." },
+    { "type": "text", "id": "hero_desc_mobile", "label": "Hero Description (Mobile)", "default": "Discover Joy: Your Ultimate Holiday Gift Destination." },
+    { "type": "text", "id": "shop_now_label", "label": "Shop Now Button Label", "default": "SHOP NOW" },
+    { "type": "text", "id": "footer_text_desktop", "label": "Footer Text (Desktop)", "default": "SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL" },
+    { "type": "text", "id": "footer_text_mobile", "label": "Footer Text (Mobile)", "default": "SUSTAINABLE, ETHICALLY MADE ACTIVEWEAR" }
+  ],
+  "presets": [
+    { "name": "Banner", "category": "Custom" }
+  ]
+}
+{% endschema %}

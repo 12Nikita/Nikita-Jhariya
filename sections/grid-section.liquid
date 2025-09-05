@@ -1,0 +1,1216 @@
+{% comment %}
+  Grid Section
+  - Dynamically fetches up to 6 products from the selected Shopify collection
+  - Displays product blocks in a 3x2 responsive grid
+  - Each product block triggers a popup with product details and functional Add to Cart
+  - Popup labels ("Color", "Size", "Choose Size", "Add to Cart") are customizable via Theme Customizer
+  - Uses Shopify's AJAX API (/cart/add.js) to add products to the cart
+  - Automatically adds "Soft Winter Jacket" when a product with Black/Medium variants is added
+  - Fixes: Correctly maps Size (option1) and Color (option2), truncates longer descriptions without scrolling or overlap
+{% endcomment %}
+<section class="grid-section">
+  <div class="grid-container">
+    <h2 class="grid-title">{{ section.settings.grid_title }}</h2>
+    <div class="grid-inner">
+      {% for product in collections[section.settings.collection].products limit: 6 %}
+        <div class="grid-item" data-product-handle="{{ product.handle }}">
+          <img src="{{ product.featured_image | img_url: 'medium' | default: 'https://via.placeholder.com/433x444' }}" alt="{{ product.title | escape }}" class="grid-item-image" data-action="open-popup">
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <!-- Popup with Overlay -->
+  <div class="popup" id="product-popup">
+    <div class="popup-overlay"></div>
+    <div class="popup-content">
+      <button class="popup-close" data-action="close-popup">×</button>
+      <img class="popup-product-image" src="" alt="Product Image">
+      <h3 class="popup-product-title"></h3>
+      <p class="popup-product-price"></p>
+      <p class="popup-product-description"></p>
+      <div class="popup-color-component">
+        <p class="popup-color-text">{{ section.settings.color_label }}</p>
+        <div class="popup-color-options"></div>
+      </div>
+      <div class="popup-size-component">
+        <p class="popup-size-text">{{ section.settings.size_label }}</p>
+        <div class="popup-size-options">
+          <span class="popup-size-text-choose">{{ section.settings.size_placeholder }}</span>
+          <span class="popup-size-line"></span>
+          <img class="popup-size-dropdown" src="{{ 'dropdown.png' | asset_url }}" alt="Dropdown">
+        </div>
+        <div class="popup-size-dropdown-content"></div>
+      </div>
+      <button class="popup-add-to-cart-button">
+        <span class="popup-add-to-cart-text">{{ section.settings.add_to_cart_text }}</span>
+        <span class="popup-add-to-cart-arrow"></span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<style>
+/* Ensure box-sizing and remove default margins */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+/* Base styling for section */
+.grid-section {
+  width: 1337px;
+  height: 981px;
+  margin: 90px auto 0px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+.grid-container {
+  width: 100%;
+  text-align: left;
+  padding: 0 10px;
+}
+.grid-title {
+  width: auto;
+  height: 43px;
+  font-family: 'Lustria', serif;
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 43.2px;
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.grid-inner {
+  width: 1339px;
+  height: 918px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, auto);
+  gap: 20px;
+  justify-content: center;
+  overflow: hidden;
+}
+.grid-item {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 433 / 444;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+}
+.grid-item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+}
+/* Popup Styles */
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.popup-active .popup-overlay {
+  opacity: 1;
+}
+.popup-content {
+  width: 311px;
+  height: 447px;
+  background: #ffffff;
+  box-shadow: 0px 2px 4px 0px #00000033;
+  padding: 0;
+  position: relative;
+  margin: 20px;
+  z-index: 1002;
+}
+.popup-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 1003;
+}
+.popup-product-image {
+  width: 120px;
+  height: 140px;
+  top: 36px;
+  left: 17px;
+  position: absolute;
+  object-fit: cover;
+}
+.popup-product-title {
+  width: 136px;
+  height: 19px;
+  top: 49px;
+  left: 145px;
+  position: absolute;
+  font-family: 'Jost', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 19.2px;
+  margin: 0;
+}
+.popup-product-price {
+  width: 64px;
+  height: 19px;
+  top: 88px;
+  left: 145px;
+  position: absolute;
+  font-family: 'Lustria', serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 19.2px;
+  color: #333;
+  margin: 0;
+}
+.popup-product-description {
+  width: 146px;
+  max-height: 60px; /* Limit height to match Figma, truncate longer text */
+  top: 119px;
+  left: 145px;
+  position: absolute;
+  font-family: 'Jost', sans-serif;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 15.4px;
+  letter-spacing: -0.14px;
+  margin: 0;
+  overflow-x: hidden; /* Prevent horizontal overflow */
+  overflow-y: hidden; /* Truncate vertical overflow without scrollbar */
+  word-break: break-word; /* Ensure text wraps within width */
+}
+.popup-color-component {
+  width: 271px;
+  height: 64.47715759277344px;
+  top: 190px;
+  left: 20px;
+  position: absolute;
+  opacity: 1;
+}
+.popup-color-text {
+  width: 33px;
+  height: 18px;
+  font-family: 'Jost', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 18.2px;
+  letter-spacing: 0%;
+  margin: 0;
+  opacity: 1;
+}
+.popup-color-options {
+  width: 271px;
+  height: 40.441322326660156px;
+  top: 24.04px;
+  position: absolute;
+  padding: 0;
+  border: 0.5px solid #000000;
+  opacity: 1;
+}
+.color-section {
+  position: absolute;
+  width: 135px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  background: transparent;
+  cursor: pointer;
+}
+.color-section:nth-child(1) {
+  left: 0px;
+}
+.color-section:nth-child(2) {
+  left: 135px;
+}
+.color-section.selected {
+  background: #000000;
+  color: white;
+}
+.color-section:hover {
+  background: #000000;
+  color: white;
+}
+.color-option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.color-rectangle {
+  width: 5.807142734527588px;
+  height: 40.441322326660156px;
+  border: 0.5px solid #000000;
+  position: absolute;
+  top: 0;
+  opacity: 1;
+  cursor: pointer;
+  display: block;
+}
+.color-rectangle.second {
+  width: 4.82812px;
+  height: 39.625px;
+  position: relative;
+}
+.color-rectangle.gray { background-color: rgb(128, 128, 128); }
+.color-rectangle.black { background-color: rgb(0, 0, 0); }
+.color-rectangle.blue { background-color: rgb(0, 0, 255); }
+.color-rectangle.green { background-color: rgb(0, 128, 0); }
+.color-rectangle.yellow { background-color: rgb(255, 255, 0); }
+.color-rectangle.red { background-color: rgb(255, 0, 0); }
+.color-rectangle.purple { background-color: rgb(128, 0, 128); }
+.color-rectangle.orange { background-color: rgb(255, 165, 0); }
+.color-rectangle.pink { background-color: rgb(255, 192, 203); }
+.color-rectangle.navy { background-color: rgb(0, 0, 128); }
+.color-text {
+  width: 115px;
+  height: 18px;
+  top: 10px;
+  left: 10px;
+  position: absolute;
+  font-family: 'Jost', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 18px;
+  letter-spacing: -0.36px;
+  text-transform: capitalize;
+  opacity: 1;
+  margin: 0;
+  cursor: pointer;
+}
+.popup-size-component {
+  width: 271px;
+  height: 64px;
+  top: 276px;
+  left: 20px;
+  position: absolute;
+}
+.popup-size-text {
+  width: 25px;
+  height: 18px;
+  font-family: 'Jost', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 18.2px;
+  margin: 0;
+}
+.popup-size-options {
+  width: 271px;
+  height: 40.44px;
+  top: 24.04px;
+  position: absolute;
+  display: flex;
+  align-items: flex-start;
+  padding: 0;
+  border: 1px solid #000000;
+  margin: 0;
+  z-index: 1004;
+  cursor: pointer;
+}
+.popup-size-text-choose {
+  width: 185px;
+  height: 20px;
+  top: 10px;
+  left: 13px;
+  position: absolute;
+  font-family: 'Jost', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 16px;
+  letter-spacing: -0.32px;
+  vertical-align: middle;
+  margin: 0;
+}
+.popup-size-line {
+  width: 39.73px;
+  height: 0;
+  top: 40px;
+  left: 216px;
+  position: absolute;
+  border: 1px solid #000000;
+  transform: rotate(-90deg);
+  transform-origin: top left;
+}
+.popup-size-dropdown {
+  width: 12px;
+  height: 6px;
+  top: 18px;
+  left: 238px;
+  position: absolute;
+  background-size: cover;
+}
+.popup-size-dropdown-content {
+  width: 271px;
+  max-height: 144px;
+  border: 1px solid #000000;
+  position: absolute;
+  top: 24.44px;
+  background: #ffffff;
+  display: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.popup-size-dropdown-content::-webkit-scrollbar {
+  display: none;
+}
+.popup-size-option {
+  width: 271px;
+  height: 36px;
+  opacity: 1;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  font-family: 'Jost', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 16px;
+  cursor: pointer;
+}
+.popup-size-option:hover {
+  background: #000000;
+  color: white;
+}
+.popup-add-to-cart-button {
+  width: 271px;
+  height: 45px;
+  top: 391px;
+  left: 20px;
+  position: absolute;
+  background: #000;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1003;
+  text-align: center;
+}
+.popup-add-to-cart-button:hover {
+  transform: scale(1.04);
+  background-color: #333;
+}
+.popup-add-to-cart-text {
+  width: 103.91px;
+  height: 21px;
+  top: 12px;
+  position: absolute;
+  font-family: 'Jost', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 20.48px;
+  text-transform: uppercase;
+  text-align: center;
+  color: #fff;
+  margin: 0;
+}
+.popup-add-to-cart-arrow {
+  width: 33.7px;
+  height: 0;
+  top: 22px;
+  left: 226.41px;
+  position: absolute;
+  border: 1.5px solid #fff;
+  border-width: 0 0 1.5px 0;
+}
+/* Desktop Responsiveness (1280px to 1439px and 1441px to 1920px) */
+@media (max-width: 1439px) and (min-width: 1280px), (min-width: 1441px) and (max-width: 1919px) {
+  .grid-section {
+    width: 1180px;
+    height: clamp(900px, 70vw, 981px);
+    margin: clamp(70px, 5vw, 90px) auto clamp(0px, 0vw, 0px);
+  }
+  .grid-inner {
+    width: 1180px;
+    height: calc(100% - 43px - clamp(10px, 1.5vw, 20px));
+  }
+}
+/* Tablet Responsiveness (768px to 1279px) */
+@media (min-width: 768px) and (max-width: 1279px) {
+  .grid-section {
+    width: 924px;
+    height: clamp(500px, 60vw, 981px);
+    margin: clamp(30px, 5vw, 70px) auto clamp(0px, 0vw, 0px);
+  }
+  .grid-inner {
+    width: 924px;
+    height: calc(100% - 43px - clamp(10px, 1.5vw, 20px));
+  }
+}
+/* Mobile View */
+@media (max-width: 767px) {
+  .grid-section {
+    width: 100%;
+    margin: 30px auto 10px;
+    max-height: calc(100vh - 40px);
+  }
+  .grid-container {
+    padding: 0 15px;
+  }
+  .grid-title {
+    font-size: clamp(18px, 3vw, 36px);
+    line-height: clamp(21.6px, 3.6vw, 43.2px);
+  }
+  .grid-inner {
+    width: 100%;
+    max-height: calc(100vh - 70px);
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    gap: 15px;
+  }
+  .popup-content {
+    width: 90%;
+    height: auto;
+    padding-bottom: 20px;
+  }
+  .popup-product-image,
+  .popup-product-title,
+  .popup-product-price,
+  .popup-product-description,
+  .popup-color-component,
+  .popup-size-component,
+  .popup-add-to-cart-button {
+    position: static;
+    width: 100%;
+    left: 0;
+    top: 0;
+    margin: 5px 0;
+  }
+  .popup-product-description {
+    max-height: 80px; /* Limit height for mobile, truncate longer text */
+    overflow-x: hidden; /* Prevent horizontal overflow */
+    overflow-y: hidden; /* Truncate vertical overflow without scrollbar */
+    word-break: break-word; /* Ensure text wraps within width */
+  }
+  .popup-color-options,
+  .popup-size-options {
+    position: static;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .color-section,
+  .color-option,
+  .color-rectangle,
+  .color-text {
+    position: static;
+    margin: 0;
+  }
+  .popup-size-dropdown-content {
+    width: 100%;
+    left: 0;
+    top: 40.44px;
+  }
+}
+@media (max-width: 375px) and (height: 680px) {
+  body {
+    width: 375px;
+    height: 680px;
+    min-height: 680px;
+    background-color: #ffffff;
+    overflow-x: hidden;
+    overflow-y: hidden; /* Prevent vertical scrolling */
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .grid-section {
+    width: 342px;
+    height: 616.26px; /* As specified */
+    margin: 50px auto; /* No top or bottom margin */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    background-color: #ffffff;
+    overflow: hidden;
+    opacity: 1;
+    transform: rotate(0deg);
+    gap: 20px; /* Apply as internal gap between title and grid-inner */
+  }
+
+  .grid-container {
+    width: 100%;
+    text-align: left;
+    padding: 0;
+  }
+
+  .grid-title {
+    width: 248px;
+    height: 29px;
+    font-family: 'Lustria', serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 28.8px; /* 24px × 120% */
+    letter-spacing: 0px;
+    vertical-align: middle;
+    margin:0 50px;
+    padding-bottom: 8px;;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+
+  .grid-inner {
+    width: 342px;
+    height: 567.26px; /* As specified */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columns */
+    grid-template-rows: repeat(3, minmax(0, 186.42px)); /* 3 rows, exact height as specified */
+    gap: 4px; /* As specified */
+    justify-content: center;
+    overflow: hidden; /* No scrolling */
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+
+  .grid-item {
+    width: 169px;
+    height: 186.42px; /* As specified */
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    opacity: 1;
+    transform: rotate(0deg);
+    position: relative;
+  }
+
+  .grid-item-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+  }
+
+  /* Popup Styles (same as 1440px query, with mobile adjustments) */
+  .popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+  }
+
+  .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  .popup-active .popup-overlay {
+    opacity: 1;
+  }
+
+  .popup-content {
+    width: 311px; /* As per 1440px query */
+    height: 447px; /* As per 1440px query */
+    background: #ffffff;
+    box-shadow: 0px 2px 4px 0px #00000033;
+    padding: 0;
+    position: relative;
+    margin: 20px;
+    z-index: 1002;
+  }
+
+  .popup-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 1003;
+  }
+
+  .popup-product-image {
+    width: 120px;
+    height: 140px;
+    top: 36px;
+    left: 17px;
+    position: absolute;
+    background-size: cover;
+  }
+
+  .popup-product-title {
+    width: 136px;
+    height: 19px;
+    top: 49px;
+    left: 145px;
+    position: absolute;
+    font-family: 'Jost', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19.2px;
+    margin: 0;
+  }
+
+  .popup-product-price {
+    width: 64px;
+    height: 19px;
+    top: 88px;
+    left: 145px;
+    position: absolute;
+    font-family: 'Lustria', serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19.2px;
+    color: #333;
+    margin: 0;
+  }
+
+  .popup-product-description {
+    width: 146px;
+    height: 60px;
+    top: 119px;
+    left: 145px;
+    position: absolute;
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 15.4px;
+    letter-spacing: -0.14px;
+    margin: 0;
+  }
+
+  .popup-color-component {
+    width: 271px;
+    height: 64.47715759277344px;
+    top: 176px;
+    left: 20px;
+    position: absolute;
+    opacity: 1;
+  }
+
+  .popup-color-text {
+    width: 33px;
+    height: 18px;
+    font-family: 'Jost', sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 18.2px;
+    letter-spacing: 0%;
+    margin: 0;
+    opacity: 1;
+  }
+
+  .popup-color-options {
+    width: 271px;
+    height: 40.441322326660156px;
+    top: 24.04px;
+    position: absolute;
+    padding: 0;
+    border: 0.5px solid #000000;
+    opacity: 1;
+  }
+
+  .color-section {
+    position: absolute;
+    width: 135px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .color-section:nth-child(1) {
+    left: 0px;
+  }
+
+  .color-section:nth-child(2) {
+    left: 135px;
+  }
+
+  .color-section.selected {
+    background: #000000;
+    color: white;
+  }
+
+  .color-section:hover {
+    background: #000000;
+    color: white;
+  }
+
+  .color-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .color-rectangle {
+    width: 5.807142734527588px;
+    height: 40.441322326660156px;
+    border: 0.5px solid #000000;
+    position: absolute;
+    top: 0;
+    opacity: 1;
+    background-attachment: scroll;
+    background-clip: border-box;
+    background-origin: padding-box;
+    background-position-x: 0%;
+    background-position-y: 0%;
+    background-repeat: repeat;
+    background-size: auto;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: block;
+    unicode-bidi: isolate;
+  }
+
+  .color-rectangle.second {
+    width: 4.82812px;
+    height: 39.625px;
+    position: relative;
+  }
+
+  .color-rectangle.gray { background-color: rgb(128, 128, 128); }
+  .color-rectangle.black { background-color: rgb(0, 0, 0); }
+  .color-rectangle.blue { background-color: rgb(0, 0, 255); }
+  .color-rectangle.green { background-color: rgb(0, 128, 0); }
+  .color-rectangle.yellow { background-color: rgb(255, 255, 0); }
+  .color-rectangle.red { background-color: rgb(255, 0, 0); }
+  .color-rectangle.purple { background-color: rgb(128, 0, 128); }
+  .color-rectangle.orange { background-color: rgb(255, 165, 0); }
+  .color-rectangle.pink { background-color: rgb(255, 192, 203); }
+  .color-rectangle.navy { background-color: rgb(0, 0, 128); }
+
+  .color-text {
+    width: 115px;
+    height: 18px;
+    top: 10px;
+    left: 10px;
+    position: absolute;
+    font-family: 'Jost', sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 18px;
+    letter-spacing: -0.36px;
+    text-transform: capitalize;
+    opacity: 1;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .popup-size-component {
+    width: 271px;
+    height: 64px;
+    top: 262px;
+    left: 20px;
+    position: absolute;
+  }
+
+  .popup-size-text {
+    width: 25px;
+    height: 18px;
+    font-family: 'Jost', sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 18.2px;
+    margin: 0;
+  }
+
+  .popup-size-options {
+    width: 271px;
+    height: 40.44px;
+    top: 24.04px;
+    position: absolute;
+    display: flex;
+    align-items: flex-start;
+    padding: 0;
+    border: 1px solid #000000;
+    margin: 0;
+    z-index: 1004;
+    cursor: pointer;
+  }
+
+  .popup-size-text-choose {
+    width: 185px;
+    height: 20px;
+    top: 10px;
+    left: 13px;
+    position: absolute;
+    font-family: 'Jost', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 16px;
+    letter-spacing: -0.32px;
+    vertical-align: middle;
+    margin: 0;
+  }
+
+  .popup-size-line {
+    width: 39.73px;
+    height: 0;
+    top: 40px;
+    left: 216px;
+    position: absolute;
+    border: 1px solid #000000;
+    transform: rotate(-90deg);
+    transform-origin: top left;
+  }
+
+  .popup-size-dropdown {
+    width: 12px;
+    height: 6px;
+    top: 18px;
+    left: 238px;
+    position: absolute;
+    background: url('assets/dropdown.png') no-repeat;
+    background-size: cover;
+  }
+
+  .popup-size-dropdown-content {
+    width: 271px;
+    max-height: 144px;
+    border: 1px solid #000000;
+    position: absolute;
+    top: 60.44px;
+    background: #ffffff;
+    display: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    opacity: 1;
+    z-index: 1006;
+    margin: 0;
+    padding: 0;
+  }
+
+  .popup-size-option {
+    width: 271px;
+    height: 36px;
+    opacity: 1;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-family: 'Jost', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 16px;
+    cursor: pointer;
+  }
+
+  .popup-size-option:hover {
+    background: #000000;
+    color: white;
+  }
+
+  .popup-add-to-cart-button {
+    width: 271px;
+    height: 45px;
+    top: 377px;
+    left: 20px;
+    position: absolute;
+    background: #000;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1003;
+    text-align: center;
+  }
+
+  .popup-add-to-cart-button:hover {
+    transform: scale(1.04);
+    background-color: #333;
+  }
+
+  .popup-add-to-cart-text {
+    width: 103.91px;
+    height: 21px;
+    top: 12px;
+    font-family: 'Jost', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20.48px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    margin: 0;
+  }
+
+  .popup-add-to-cart-arrow {
+    width: 33.7px;
+    height: 0;
+    top: 399px;
+    left: 226.41px;
+    position: absolute;
+    border: 1.5px solid #fff;
+    border-width: 0 0 1.5px 0;
+  }
+}
+    
+</style>
+
+<script>
+// Product data fetched server-side and passed to client
+const products = {};
+{% for product in collections[section.settings.collection].products limit: 6 %}
+  products['{{ product.handle }}'] = {
+    id: '{{ product.id }}',
+    title: '{{ product.title | escape }}',
+    price: '{{ product.price | money }}',
+    description: '{{ product.description | strip_html | escape }}',
+    image: '{{ product.featured_image | img_url: 'medium' | default: 'https://via.placeholder.com/120x140' }}',
+    variants: [
+      {% for variant in product.variants %}
+        {
+          id: '{{ variant.id }}',
+          title: '{{ variant.title | escape }}',
+          size: '{{ variant.option1 | escape }}',
+          color: '{{ variant.option2 | escape }}'
+        }{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    ]
+  };
+{% endfor %}
+// Placeholder for Soft Winter Jacket variant ID
+const softWinterJacketHandle = 'soft-winter-jacket'; // Adjust to actual handle from CSV
+// Popup functionality
+document.addEventListener('DOMContentLoaded', () => {
+  const popup = document.getElementById('product-popup');
+  const popupImage = document.querySelector('.popup-product-image');
+  const popupTitle = document.querySelector('.popup-product-title');
+  const popupPrice = document.querySelector('.popup-product-price');
+  const popupDescription = document.querySelector('.popup-product-description');
+  const popupColorOptions = document.querySelector('.popup-color-options');
+  const popupSizeOptions = document.querySelector('.popup-size-options');
+  const popupSizeDropdown = document.querySelector('.popup-size-dropdown-content');
+  const popupSizeTextChoose = document.querySelector('.popup-size-text-choose');
+  const body = document.body;
+  let selectedVariantId = null;
+  let selectedSize = null;
+  let selectedColor = null;
+  let currentProductHandle = null;
+  // Open popup on image click
+  document.querySelectorAll('[data-action="open-popup"]').forEach(image => {
+    image.addEventListener('click', () => {
+      currentProductHandle = image.closest('.grid-item').dataset.productHandle;
+      const product = products[currentProductHandle];
+      if (product) {
+        popupImage.src = product.image;
+        popupImage.alt = product.title;
+        popupTitle.textContent = product.title;
+        popupPrice.textContent = product.price;
+        popupDescription.textContent = product.description;
+        // Populate color options
+        const uniqueColors = [...new Set(product.variants.map(v => v.color))];
+        popupColorOptions.innerHTML = uniqueColors.map((color, index) => {
+          const isSecond = index === 1;
+          return `
+            <div class="color-section">
+              <div class="color-option ${color.toLowerCase()}">
+                <div class="color-rectangle ${isSecond ? 'second' : ''} ${color.toLowerCase()}" data-color="${color}"></div>
+                <span class="color-text ${color.toLowerCase()}">${color}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+        // Populate size options
+        const uniqueSizes = [...new Set(product.variants.map(v => v.size))];
+        popupSizeDropdown.innerHTML = uniqueSizes.map(size => `
+          <div class="popup-size-option">${size}</div>
+        `).join('');
+        // Reset selections
+        selectedVariantId = null;
+        selectedSize = null;
+        selectedColor = null;
+        popupSizeTextChoose.textContent = '{{ section.settings.size_placeholder }}';
+        popup.style.display = 'flex';
+        body.classList.add('popup-active');
+      } else {
+        console.error('Product not found for handle:', currentProductHandle);
+      }
+    });
+  });
+  // Color selection handling
+  popupColorOptions.addEventListener('click', (e) => {
+    const colorSection = e.target.closest('.color-section');
+    if (colorSection) {
+      popupColorOptions.querySelectorAll('.color-section').forEach(section => section.classList.remove('selected'));
+      colorSection.classList.add('selected');
+      selectedColor = colorSection.querySelector('.color-rectangle').dataset.color;
+      // Update variant based on selected color and size
+      if (selectedSize) {
+        const variant = products[currentProductHandle].variants.find(
+          v => v.color === selectedColor && v.size === selectedSize
+        );
+        selectedVariantId = variant ? variant.id : null;
+      }
+    }
+  });
+  // Size dropdown toggle
+  popupSizeOptions.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    popupSizeDropdown.style.display = popupSizeDropdown.style.display === 'block' ? 'none' : 'block';
+  });
+  // Size selection
+  popupSizeDropdown.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const sizeOption = e.target.closest('.popup-size-option');
+    if (sizeOption) {
+      selectedSize = sizeOption.textContent;
+      popupSizeTextChoose.textContent = selectedSize;
+      popupSizeDropdown.style.display = 'none';
+      // Update variant based on selected color and size
+      if (selectedColor) {
+        const variant = products[currentProductHandle].variants.find(
+          v => v.color === selectedColor && v.size === selectedSize
+        );
+        selectedVariantId = variant ? variant.id : null;
+      }
+    }
+  });
+  // Close popup
+  document.querySelector('[data-action="close-popup"]').addEventListener('click', () => {
+    popup.style.display = 'none';
+    body.classList.remove('popup-active');
+    popupSizeDropdown.style.display = 'none';
+  });
+  // Add to Cart functionality
+  document.querySelector('.popup-add-to-cart-button').addEventListener('click', () => {
+    if (!selectedVariantId || !selectedColor || !selectedSize) {
+      alert('Please select a color and size');
+      return;
+    }
+    const itemsToAdd = [{ id: selectedVariantId, quantity: 1 }];
+    // Check if selected variant is Black/Medium
+    if (selectedColor === 'Black' && selectedSize === 'Medium') {
+      const softWinterJacket = products[softWinterJacketHandle];
+      if (softWinterJacket) {
+        const blackMediumVariant = softWinterJacket.variants.find(
+          v => v.color === 'Black' && v.size === 'Medium'
+        );
+        if (blackMediumVariant) {
+          itemsToAdd.push({ id: blackMediumVariant.id, quantity: 1 });
+        } else {
+          console.warn('Soft Winter Jacket Black/Medium variant not found');
+        }
+      } else {
+        console.warn('Soft Winter Jacket product not found');
+      }
+    }
+    // Add items to cart
+    fetch('/cart/add.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ items: itemsToAdd })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      alert('Product(s) added to cart!');
+      popup.style.display = 'none';
+      body.classList.remove('popup-active');
+      // Optionally update cart drawer
+      if (window.Shopify && window.Shopify.onCartUpdate) {
+        window.Shopify.onCartUpdate(data);
+      }
+    })
+    .catch(err => {
+      console.error('Error adding to cart:', err);
+      alert('Error adding to cart. Please try again.');
+    });
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "Grid-Section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "grid_title",
+      "label": "Grid Title",
+      "default": "Tisso vison in the wild"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Select Collection"
+    },
+    {
+      "type": "text",
+      "id": "color_label",
+      "label": "Color Label",
+      "default": "Color"
+    },
+    {
+      "type": "text",
+      "id": "size_label",
+      "label": "Size Label",
+      "default": "Size"
+    },
+    {
+      "type": "text",
+      "id": "size_placeholder",
+      "label": "Size Placeholder Text",
+      "default": "Choose Size"
+    },
+    {
+      "type": "text",
+      "id": "add_to_cart_text",
+      "label": "Add to Cart Button Text",
+      "default": "Add to Cart"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Grid Section"
+    }
+  ]
+}
+{% endschema %}
