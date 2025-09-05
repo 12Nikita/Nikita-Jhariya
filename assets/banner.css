@@ -445,7 +445,9 @@ footer {
   .top-left-text {
     width: calc(80.77px + (151.44 - 80.77) * ((100vw - 768px) / (1439 - 768)));
     height: calc(10.13px + (19 - 10.13) * ((100vw - 768px) / (1439 - 768)));
-    font-size: calc(8.53px + (16 - 8.53) * ((100vw - 768px) / (1439 - 768)));
+    font-weight:400;
+      font-family: 'Jost', sans-serif;
+
     line-height: calc(7.16px + (13.42 - 7.16) * ((100vw - 768px) / (1439 - 768)));
   }
 
@@ -553,7 +555,7 @@ footer {
   }
 
   /* Footer */
-  footer {
+  .footer {
     width: 100%;
     height: calc(18.13px + (34 - 18.13px) * ((100vw - 768px) / (1439 - 768)));
     padding: calc(5.33px + (10 - 5.33px) * ((100vw - 768px) / (1439 - 768)));
@@ -574,15 +576,14 @@ footer {
   .mobile-frame1 {
     position: relative;
     width: 100%;
-    height: calc(264px + (350 - 264) * (100vw - 375px) / (767 - 375));
+    height: calc(164px + (350 - 164) * (100vw - 375px) / (767 - 375));
     overflow: hidden;
-    top: 157px;
+    top: 197px;
     display: block;
   }
 
   .image-mobile-wrapper1 {
     position: absolute;
-    top: 0;
     left: calc(-140px + (-220 + 140) * (100vw - 375px) / (767 - 375));
     width: calc(686px + (900 - 686) * (100vw - 375px) / (767 - 375));
     height: 100%;
@@ -592,6 +593,7 @@ footer {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    z-index:1;
   }
 
   .frame1,
@@ -630,11 +632,11 @@ footer {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: calc(151px + (170 - 151) * (100vw - 375px) / (767 - 375));
+    width: calc(191px + (280 - 191) * (100vw - 375px) / (767 - 375));
     height: calc(19px + (22 - 19) * (100vw - 375px) / (767 - 375));
     font-size: calc(16px + (18 - 16) * (100vw - 375px) / (767 - 375));
     text-align: center;
-    line-height: 19px;
+    line-height:19px;
   }
 
   /* When expanded, move TISSO to top section */
@@ -744,10 +746,13 @@ footer {
   }
 
   .shop-now {
+    position:absolute;
     top: calc(337px + (400 - 337) * (100vw - 375px) / (767 - 375));
     width: calc(193px + (250 - 193) * (100vw - 375px) / (767 - 375));
     height: calc(45px + (60 - 45) * (100vw - 375px) / (767 - 375));
     font-size: calc(16px + (18 - 16) * (100vw - 375px) / (767 - 375));
+        z-index: 2;     /* ensure button is above image */
+
   }
 
   .shop-now img {
@@ -761,7 +766,7 @@ footer {
     display: none;
   }
 
-  footer {
+  .footer {
     position: fixed;
     bottom: 0;
     left: 0;
