@@ -1009,9 +1009,10 @@ const products = {};
     ]
   };
 {% endfor %}
-// Placeholder for Soft Winter Jacket variant ID
-const softWinterJacketHandle = 'soft-winter-jacket'; // Adjust to actual handle from CSV
-// Popup functionality
+
+// Placeholder for Soft Winter Jacket handle
+const softWinterJacketHandle = 'soft-winter-jacket';
+
 document.addEventListener('DOMContentLoaded', () => {
   const popup = document.getElementById('product-popup');
   const popupImage = document.querySelector('.popup-product-image');
@@ -1023,149 +1024,131 @@ document.addEventListener('DOMContentLoaded', () => {
   const popupSizeDropdown = document.querySelector('.popup-size-dropdown-content');
   const popupSizeTextChoose = document.querySelector('.popup-size-text-choose');
   const body = document.body;
+
   let selectedVariantId = null;
   let selectedSize = null;
   let selectedColor = null;
   let currentProductHandle = null;
-  // Open popup on image click
+
+  // Open popup on product image click
   document.querySelectorAll('[data-action="open-popup"]').forEach(image => {
     image.addEventListener('click', () => {
       currentProductHandle = image.closest('.grid-item').dataset.productHandle;
       const product = products[currentProductHandle];
-      if (product) {
-        popupImage.src = product.image;
-        popupImage.alt = product.title;
-        popupTitle.textContent = product.title;
-        popupPrice.textContent = product.price;
-        popupDescription.textContent = product.description;
-        // Populate color options
-        const uniqueColors = [...new Set(product.variants.map(v => v.color))];
-        popupColorOptions.innerHTML = uniqueColors.map((color, index) => {
-          const isSecond = index === 1;
-          return `
-            <div class="color-section">
-              <div class="color-option ${color.toLowerCase()}">
-                <div class="color-rectangle ${isSecond ? 'second' : ''} ${color.toLowerCase()}" data-color="${color}"></div>
-                <span class="color-text ${color.toLowerCase()}">${color}</span>
-              </div>
-            </div>
-          `;
-        }).join('');
-        // Populate size options
-        const uniqueSizes = [...new Set(product.variants.map(v => v.size))];
-        popupSizeDropdown.innerHTML = uniqueSizes.map(size => `
-          <div class="popup-size-option">${size}</div>
-        `).join('');
-        // Reset selections
-        selectedVariantId = null;
-        selectedSize = null;
-        selectedColor = null;
-        popupSizeTextChoose.textContent = '{{ section.settings.size_placeholder }}';
-        popup.style.display = 'flex';
-        body.classList.add('popup-active');
-      } else {
-        console.error('Product not found for handle:', currentProductHandle);
-      }
+      if (!product) return console.error('Product not found:', currentProductHandle);
+
+      // Populate popup
+      popupImage.src = product.image;
+      popupImage.alt = product.title;
+      popupTitle.textContent = product.title;
+      popupPrice.textContent = product.price;
+      popupDescription.textContent = product.description;
+
+      // Color options
+      const uniqueColors = [...new Set(product.variants.map(v => v.color))];
+      popupColorOptions.innerHTML = uniqueColors.map((color, index) => `
+        <div class="color-section">
+          <div class="color-option ${color.toLowerCase()}">
+            <div class="color-rectangle ${index === 1 ? 'second' : ''} ${color.toLowerCase()}" data-color="${color}"></div>
+            <span class="color-text ${color.toLowerCase()}">${color}</span>
+          </div>
+        </div>
+      `).join('');
+
+      // Size options
+      const uniqueSizes = [...new Set(product.variants.map(v => v.size))];
+      popupSizeDropdown.innerHTML = uniqueSizes.map(size => `
+        <div class="popup-size-option">${size}</div>
+      `).join('');
+
+      // Reset selections
+      selectedVariantId = null;
+      selectedColor = null;
+      selectedSize = null;
+      popupSizeTextChoose.textContent = '{{ section.settings.size_placeholder }}';
+
+      popup.style.display = 'flex';
+      body.classList.add('popup-active');
     });
   });
-  // Color selection handling
+
+  // Color selection
   popupColorOptions.addEventListener('click', (e) => {
     const colorSection = e.target.closest('.color-section');
-    if (colorSection) {
-      popupColorOptions.querySelectorAll('.color-section').forEach(section => section.classList.remove('selected'));
-      colorSection.classList.add('selected');
-      selectedColor = colorSection.querySelector('.color-rectangle').dataset.color;
-      // Update variant based on selected color and size
-      if (selectedSize) {
-        const variant = products[currentProductHandle].variants.find(
-          v => v.color === selectedColor && v.size === selectedSize
-        );
-        selectedVariantId = variant ? variant.id : null;
-      }
+    if (!colorSection) return;
+    popupColorOptions.querySelectorAll('.color-section').forEach(s => s.classList.remove('selected'));
+    colorSection.classList.add('selected');
+    selectedColor = colorSection.querySelector('.color-rectangle').dataset.color;
+
+    if (selectedSize) {
+      const variant = products[currentProductHandle].variants.find(v => v.color === selectedColor && v.size === selectedSize);
+      selectedVariantId = variant ? variant.id : null;
     }
   });
+
   // Size dropdown toggle
   popupSizeOptions.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
     popupSizeDropdown.style.display = popupSizeDropdown.style.display === 'block' ? 'none' : 'block';
   });
+
   // Size selection
   popupSizeDropdown.addEventListener('click', (e) => {
-    e.stopPropagation();
     const sizeOption = e.target.closest('.popup-size-option');
-    if (sizeOption) {
-      selectedSize = sizeOption.textContent;
-      popupSizeTextChoose.textContent = selectedSize;
-      popupSizeDropdown.style.display = 'none';
-      // Update variant based on selected color and size
-      if (selectedColor) {
-        const variant = products[currentProductHandle].variants.find(
-          v => v.color === selectedColor && v.size === selectedSize
-        );
-        selectedVariantId = variant ? variant.id : null;
-      }
+    if (!sizeOption) return;
+    selectedSize = sizeOption.textContent;
+    popupSizeTextChoose.textContent = selectedSize;
+    popupSizeDropdown.style.display = 'none';
+
+    if (selectedColor) {
+      const variant = products[currentProductHandle].variants.find(v => v.color === selectedColor && v.size === selectedSize);
+      selectedVariantId = variant ? variant.id : null;
     }
   });
+
   // Close popup
   document.querySelector('[data-action="close-popup"]').addEventListener('click', () => {
     popup.style.display = 'none';
-    body.classList.remove('popup-active');
     popupSizeDropdown.style.display = 'none';
+    body.classList.remove('popup-active');
   });
-  // Add to Cart functionality
+
+  // Add to cart
   document.querySelector('.popup-add-to-cart-button').addEventListener('click', () => {
     if (!selectedVariantId || !selectedColor || !selectedSize) {
       alert('Please select a color and size');
       return;
     }
+
     const itemsToAdd = [{ id: selectedVariantId, quantity: 1 }];
-    // Check if selected variant is Black/Medium
+
     if (selectedColor === 'Black' && selectedSize === 'Medium') {
       const softWinterJacket = products[softWinterJacketHandle];
       if (softWinterJacket) {
-        const blackMediumVariant = softWinterJacket.variants.find(
-          v => v.color === 'Black' && v.size === 'Medium'
-        );
-        if (blackMediumVariant) {
-          itemsToAdd.push({ id: blackMediumVariant.id, quantity: 1 });
-        } else {
-          console.warn('Soft Winter Jacket Black/Medium variant not found');
-        }
-      } else {
-        console.warn('Soft Winter Jacket product not found');
+        const blackMediumVariant = softWinterJacket.variants.find(v => v.color === 'Black' && v.size === 'Medium');
+        if (blackMediumVariant) itemsToAdd.push({ id: blackMediumVariant.id, quantity: 1 });
       }
     }
-    // Add items to cart
+
     fetch('/cart/add.js', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items: itemsToAdd })
     })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      alert('Product(s) added to cart!');
-      popup.style.display = 'none';
-      body.classList.remove('popup-active');
-      // Optionally update cart drawer
-      if (window.Shopify && window.Shopify.onCartUpdate) {
-        window.Shopify.onCartUpdate(data);
-      }
+    .then(res => res.ok ? res.json() : Promise.reject('Add to cart failed'))
+    .then(() => {
+      window.location.href = '/cart';
     })
     .catch(err => {
-      console.error('Error adding to cart:', err);
+      console.error(err);
       alert('Error adding to cart. Please try again.');
     });
   });
+
 });
 </script>
+
 
 {% schema %}
 {
