@@ -97,44 +97,35 @@
       justify-content: flex-start;
     }
 
-   .grid-inner {
-  width: 100%; /* Full width of container */
-  display: flex;
-  flex-wrap: nowrap; /* Prevent wrapping, allow horizontal flow */
-  gap: 20px; /* Consistent spacing between items */
-  overflow-x: auto; /* Enable horizontal scrolling */
-  overflow-y: visible; /* Prevent vertical clipping */
-  padding-bottom: 10px; /* Space for scrollbar */
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-  scrollbar-width: none; /* Hide scrollbar for Firefox */
-  -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
-  scroll-behavior: smooth; /* Smooth scrolling */
-}
+    .grid-inner {
+      width: 1339px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, auto);
+      gap: 20px;
+      justify-content: center;
+      overflow: visible; /* Ensure no clipping */
+    }
 
-.grid-inner::-webkit-scrollbar {
-  display: none; /* Hide scrollbar for Chrome/Safari */
-}
+    .grid-item {
+      width: 100%;
+      height: 0;
+      padding-bottom: calc(444 / 433 * 100%); /* Maintain aspect ratio 433:444 */
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      position: relative;
+    }
 
-.grid-item {
-  flex: 0 0 433px; /* Fixed width for desktop, matches original */
-  height: 0;
-  padding-bottom: calc(444 / 433 * 100%); /* Maintain 433:444 aspect ratio */
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  position: relative;
-  min-width: 433px; /* Ensure consistent width */
-}
-
-.grid-item-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  cursor: pointer;
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: block;
-}
+    .grid-item-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      cursor: pointer;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block; /* Ensure visibility */
+    }
 
     /* Popup Styles */
     .popup {
@@ -418,23 +409,24 @@
       background-size: cover;
     }
 
-     .popup-size-dropdown-content {
-        width: 271px;
-        max-height: 144px;
-        border: 1px solid #000000;
-        position: absolute;
-        top: 63.44px;
-        background: #ffffff;
-        display: none;
-        overflow-y: auto;
-        overflow-x: hidden;
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-        z-index:2;
-      }
-      .popup-size-dropdown-content::-webkit-scrollbar {
-        display: none;
-      }
+    .popup-size-dropdown-content {
+      width: 271px;
+      max-height: 144px;
+      border: 1px solid #000000;
+      position: absolute;
+      top: 24.44px;
+      background: #ffffff;
+      display: none;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      z-index:2;
+    }
+
+    .popup-size-dropdown-content::-webkit-scrollbar {
+      display: none;
+    }
 
     .popup-size-option {
       width: 271px;
@@ -537,19 +529,22 @@
 
   .grid-inner {
     width: 1339px;
+    min-height: 918px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
     gap: 20px;
-    overflow-x: auto;
-    padding-bottom: 10px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    justify-content: center;
+    overflow: hidden;
   }
-  .grid-inner::-webkit-scrollbar {
-    display: none;
-  }
+
   .grid-item {
-    flex: 0 0 433px;
-    min-width: 433px;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 433 / 444;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    max-width: 433px;
     max-height: 444px;
   }
 }
@@ -560,22 +555,9 @@
         margin: clamp(70px, 5vw, 90px) auto clamp(0px, 0vw, 0px);
       }
       .grid-inner {
-    width: 1180px;
-    gap: 20px;
-    overflow-x: auto;
-    padding-bottom: 10px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .grid-inner::-webkit-scrollbar {
-    display: none;
-  }
-  .grid-item {
-    flex: 0 0 380px; /* Slightly smaller for narrower screens */
-    min-width: 380px;
-    padding-bottom: calc(444 / 433 * 100%);
-  }
+        width: 1180px;
+        grid-template-columns: repeat(3, 1fr);
+      }
     }
 
     /* Tablet Responsiveness (768px to 1279px) */
@@ -584,22 +566,10 @@
         width: 924px;
         margin: clamp(30px, 5vw, 70px) auto clamp(0px, 0vw, 0px);
       }
-     width: 924px;
-    gap: 15px;
-    overflow-x: auto;
-    padding-bottom: 10px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .grid-inner::-webkit-scrollbar {
-    display: none;
-  }
-  .grid-item {
-    flex: 0 0 300px; /* Adjusted for tablet */
-    min-width: 300px;
-    padding-bottom: calc(444 / 433 * 100%);
-  }
+      .grid-inner {
+        width: 924px;
+        grid-template-columns: repeat(3, 1fr);
+      }
     }
     @media (width: 3840px) {
   body {
@@ -1029,36 +999,31 @@
         margin: 0 auto;
         padding-bottom: 8px;
       }
-     .grid-inner {
-    width: 100%;
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 4px;
-    overflow-x: auto;
-    overflow-y: visible;
-    padding-bottom: 10px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .grid-inner::-webkit-scrollbar {
-    display: none;
-  }
-  .grid-item {
-    flex: 0 0 169px; /* Matches mobile width */
-    min-width: 169px;
-    min-height: 186.42px;
-    padding-bottom: calc(444 / 433 * 100%);
-  }
-  .grid-item-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
-    display: block;
-  }
+      .grid-inner {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(auto-fill, minmax(186.42px, 1fr));
+        gap: 4px;
+        overflow: visible; /* Prevent clipping */
+      }
+      .grid-item {
+        width: 100%;
+        height: 0;
+        min-height: 186.42px; /* Ensure visibility */
+        padding-bottom: calc(444 / 433 * 100%); /* Maintain aspect ratio */
+        position: relative;
+      }
+      .grid-item-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        cursor: pointer;
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: block; /* Ensure visibility */
+      }
       /* Popup Styles (aligned with 375px/680px query) */
       .popup {
         position: fixed;
