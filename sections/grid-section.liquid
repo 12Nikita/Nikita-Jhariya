@@ -1438,7 +1438,7 @@ grid-auto-rows: 444px; /* Each row 444px, auto-added for extra products */
   <script>
     // Product data fetched server-side and passed to client
     const products = {};
-    {% for product in collections[section.settings.collection].products limit: 21 %}
+    {% for product in collections[section.settings.collection].products limit: 9 %}
       products['{{ product.handle }}'] = {
         id: '{{ product.id }}',
         title: '{{ product.title | escape }}',
