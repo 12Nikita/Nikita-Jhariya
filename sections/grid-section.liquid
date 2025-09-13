@@ -1497,6 +1497,8 @@ grid-auto-rows: 444px; /* Each row 444px, auto-added for extra products */
       let selectedColor = null;
       let currentProductHandle = null;
 
+      console.log('Products loaded:', products); // Debug: Log products object
+
       // Open popup on product image click
       document.querySelectorAll('[data-action="open-popup"]').forEach(image => {
         image.addEventListener('click', () => {
@@ -1552,7 +1554,9 @@ grid-auto-rows: 444px; /* Each row 444px, auto-added for extra products */
         selectedColor = colorSection.querySelector('.color-rectangle').dataset.color;
 
         if (selectedSize) {
-          const variant = products[currentProductHandle].variants.find(v => v.color === selectedColor && v.size === selectedSize);
+          const variant = products[currentProductHandle].variants.find(
+            v => v.color.toLowerCase() === selectedColor.toLowerCase() && v.size.toLowerCase() === selectedSize.toLowerCase()
+          );
           selectedVariantId = variant ? variant.id : null;
         }
       });
@@ -1573,7 +1577,9 @@ grid-auto-rows: 444px; /* Each row 444px, auto-added for extra products */
         popupSizeDropdown.style.display = 'none';
 
         if (selectedColor) {
-          const variant = products[currentProductHandle].variants.find(v => v.color === selectedColor && v.size === selectedSize);
+          const variant = products[currentProductHandle].variants.find(
+            v => v.color.toLowerCase() === selectedColor.toLowerCase() && v.size.toLowerCase() === selectedSize.toLowerCase()
+          );
           selectedVariantId = variant ? variant.id : null;
         }
       });
@@ -1592,18 +1598,24 @@ grid-auto-rows: 444px; /* Each row 444px, auto-added for extra products */
           return;
         }
 
+        console.log('Selected:', { color: selectedColor, size: selectedSize, variantId: selectedVariantId }); // Debug: Log selections
+
         const itemsToAdd = [{ id: selectedVariantId, quantity: 1 }];
 
-        // Add Soft Winter Jacket (handle: dark-winter-jacket) for Black/Medium variants
-        if (selectedColor === 'Black' && selectedSize === 'Medium') {
+        // Add Soft Winter Jacket (handle: dark-winter-jacket) for Black/M variants
+        if (selectedColor.toLowerCase() === 'black' && selectedSize.toLowerCase() === 'm') {
+          console.log('Attempting to add Soft Winter Jacket'); // Debug
           const extraJacket = products['dark-winter-jacket'];
           if (extraJacket) {
-            const blackMediumVariant = extraJacket.variants.find(v => v.color === 'Black' && v.size === 'Medium');
-            if (blackMediumVariant) {
-              itemsToAdd.push({ id: blackMediumVariant.id, quantity: 1 });
+            const blackMVariant = extraJacket.variants.find(
+              v => v.color.toLowerCase() === 'black' && v.size.toLowerCase() === 'm'
+            );
+            console.log('Black/M variant:', blackMVariant); // Debug
+            if (blackMVariant) {
+              itemsToAdd.push({ id: blackMVariant.id, quantity: 1 });
             } else {
-              console.warn('Soft Winter Jacket (dark-winter-jacket) Black/Medium variant not found');
-              alert('Warning: Soft Winter Jacket (Black/Medium) unavailable and will not be added.');
+              console.warn('Soft Winter Jacket (dark-winter-jacket) Black/M variant not found');
+              alert('Warning: Soft Winter Jacket (Black/M) unavailable and will not be added.');
             }
           } else {
             console.warn('Soft Winter Jacket (dark-winter-jacket) product not found');
@@ -1611,20 +1623,28 @@ grid-auto-rows: 444px; /* Each row 444px, auto-added for extra products */
           }
         }
 
+        console.log('Items to add:', itemsToAdd); // Debug: Log cart items
+
         fetch('/cart/add.js', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ items: itemsToAdd })
         })
-        .then(res => res.ok ? res.json() : Promise.reject('Add to cart failed'))
-        .then(() => {
+        .then(res => {
+          if (!res.ok) {
+            return res.text().then(text => Promise.reject(`Add to cart failed: ${text}`));
+          }
+          return res.json();
+        })
+        .then(data => {
+          console.log('Cart response:', data); // Debug: Log API response
           popup.style.display = 'none';
           body.classList.remove('popup-active');
-          window.location.href = '/cart'; // Redirect to Shopify's cart page
+          window.location.href = '/cart';
         })
         .catch(err => {
-          console.error(err);
-          alert('Error adding to cart. Please try again.');
+          console.error('Cart error:', err);
+          alert('Error adding to cart: ' + err);
         });
       });
     });
