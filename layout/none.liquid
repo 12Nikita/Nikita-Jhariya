@@ -9,6 +9,9 @@
     {{ 'theme.css' | asset_url | stylesheet_tag }} 
   </head>
   <body>
+  <div style="display:block; width:100%;">
     {{ content_for_layout }}
-  </body>
+  </div>
+</body>
+
 </html>
