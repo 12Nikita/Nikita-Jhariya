@@ -504,7 +504,9 @@
     flex-direction: column;
     justify-content: flex-start;
     background-color: #ffffff;
-    overflow: hidden;
+    overflow-x: hidden;
+        overflow-y: hidden;
+
   }
 
   .grid-container {
@@ -534,7 +536,8 @@
     grid-template-rows: repeat(2, 1fr);
     gap: 20px;
     justify-content: center;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y:visible;
   }
 
   .grid-item {
@@ -1428,7 +1431,7 @@
   <script>
     // Product data fetched server-side and passed to client
     const products = {};
-    {% for product in collections[section.settings.collection].products limit: 6 %}
+    {% for product in collections[section.settings.collection].products limit: 21 %}
       products['{{ product.handle }}'] = {
         id: '{{ product.id }}',
         title: '{{ product.title | escape }}',
