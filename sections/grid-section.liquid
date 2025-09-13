@@ -484,14 +484,14 @@
     }
 
     .popup-add-to-cart-arrow {
-      position: absolute; /* or relative, depending on layout */
-  top: 399px;         /* match Figma */
-  left: 226.41px;     /* match Figma */
-  width: 34px;        /* approx Figma width */
-  height: auto;       /* preserve PNG aspect ratio */
-  opacity: 1;
+      width: 33.7px;
+      height: 0;
+      top: 22px;
+      left: 226.41px;
+      position: absolute;
+      border: 1.5px solid #fff;
+      border-width: 0 0 1.5px 0;
     }
-  
 @media (width: 1440px) {
   body {
     width: 1440px;
@@ -976,14 +976,16 @@
     color: #fff;
     margin: 0;
   }
-  .popup-add-to-cart-arrow {
-      position: relative; /* or relative, depending on layout */
-  top: 399px;         /* match Figma */
-  left: 226.41px;     /* match Figma */
-  width: 34px;        /* approx Figma width */
-  height:0;       /* preserve PNG aspect ratio */
-  opacity: 1;
-    }
+
+    .popup-add-to-cart-arrow {
+        width: 33.7px;
+        height: 0;
+        top: 22px;
+        left: 200px;
+        position: absolute;
+        border: 1.5px solid #fff;
+        border-width: 0 0 1.5px 0;
+      }
 }
 
     /* Mobile Responsiveness (≤767px) */
@@ -1281,15 +1283,15 @@
         color: #fff;
         margin: 0;
       }
-     .popup-add-to-cart-arrow {
-      position: absolute; /* or relative, depending on layout */
-  top: 399px;         /* match Figma */
-  left: 226.41px;     /* match Figma */
-  width: 34px;        /* approx Figma width */
-  height: auto;       /* preserve PNG aspect ratio */
-  opacity: 1;
-    }
-  }
+      .popup-add-to-cart-arrow {
+        width: 33.7px;
+        height: 0;
+        top: 22px;
+        left: 200px;
+        position: absolute;
+        border: 1.5px solid #fff;
+        border-width: 0 0 1.5px 0;
+      }
 
     /* Mobile Specific (375px, 680px) */
     @media (max-width: 375px) and (height: 680px) {
@@ -1424,14 +1426,7 @@
         left: 20px;
         position: absolute;
       }
-     .popup-add-to-cart-arrow {
-      position: relative; /* or relative, depending on layout */
-  top: 399px;         /* match Figma */
-  left: 226.41px;     /* match Figma */
-  width: 34px;        /* approx Figma width */
-  height:0;       /* preserve PNG aspect ratio */
-  opacity: 1;
-    }
+      
     }
   </style>
 
