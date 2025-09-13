@@ -1331,12 +1331,11 @@
     line-height: 28.8px; /* 24px × 120% */
     letter-spacing: 0px;
     vertical-align: middle;
-    margin:0 50px;
-    margin-left:70px;
-    padding-bottom: 8px;;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
+    display: flex;            /* enable flex for centering */
+    justify-content: center;  /* horizontal center */
+    align-items: center;      /* vertical center if height is defined */
+    text-align: center;       /* optional, for inner text/images */
+    margin: 0 auto;   
     opacity: 1;
     transform: rotate(0deg);
   }
