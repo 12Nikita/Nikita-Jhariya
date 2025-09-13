@@ -104,16 +104,8 @@
       grid-template-rows: repeat(2, auto);
       gap: 20px;
       justify-content: center;
-     overflow-x: auto; /* Enable horizontal scrolling */
-    overflow-y: visible; /* Prevent vertical clipping */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-    scrollbar-width: none; /* Hide scrollbar for Firefox */
-    -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
-    scroll-behavior: smooth; /* Smooth scrolling */
-  }
-  .grid-inner::-webkit-scrollbar {
-    display: none; /* Hide scrollbar for Chrome/Safari */
-  }
+      overflow: visible; /* Ensure no clipping */
+    }
 
     .grid-item {
       width: 100%;
@@ -541,11 +533,11 @@
     min-height: 918px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 1fr);
+grid-auto-rows: 444px; /* Each row 444px, auto-added for extra products */
     gap: 20px;
     justify-content: center;
-   overflow-x: auto; /* Enable horizontal scrolling */
-    overflow-y: visible; /* Prevent vertical clipping */
+   overflow-x: hidden; /* Prevent horizontal overflow */
+    overflow-y: auto; /* Enable vertical scrolling for extra rows */
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
     scrollbar-width: none; /* Hide scrollbar for Firefox */
     -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
@@ -607,15 +599,7 @@
     grid-template-rows: repeat(2, 1fr);
     gap: 40px;
     justify-content: center;
-    overflow-x: auto; /* Enable horizontal scrolling */
-    overflow-y: visible; /* Prevent vertical clipping */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-    scrollbar-width: none; /* Hide scrollbar for Firefox */
-    -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
-    scroll-behavior: smooth; /* Smooth scrolling */
-  }
-  .grid-inner::-webkit-scrollbar {
-    display: none; /* Hide scrollbar for Chrome/Safari */
+    overflow: hidden;
   }
   .grid-title {
     display: none;
@@ -1030,16 +1014,8 @@
         grid-template-columns: repeat(2, 1fr);
         grid-template-rows: repeat(auto-fill, minmax(186.42px, 1fr));
         gap: 4px;
-        overflow-x: auto; /* Enable horizontal scrolling */
-    overflow-y: visible; /* Prevent vertical clipping */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-    scrollbar-width: none; /* Hide scrollbar for Firefox */
-    -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
-    scroll-behavior: smooth; /* Smooth scrolling */
-  }
-  .grid-inner::-webkit-scrollbar {
-    display: none; /* Hide scrollbar for Chrome/Safari */
-  }
+        overflow: visible; /* Prevent clipping */
+      }
       .grid-item {
         width: 100%;
         height: 0;
